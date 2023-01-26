@@ -1,0 +1,127 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: postgre
+spec:
+  selector:
+    matchLabels:
+      app: postgre
+  template: 
+    metadata:
+      labels:
+        app: postgre
+    spec:
+      containers:
+        - name: postgre
+          image: postgres:15.0
+          ports:
+          - containerPort: 5432
+          env:
+          - name: POSTGRES_PASSWORD
+            value: admin
+          - name: POSTGRES_USER
+            value: admin
+          - name: POSTGRES_DB
+            value: bd
+          
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgre
+spec:
+  selector:
+    app: postgre
+  ports:
+    - port: 5432
+  type: ClusterIP
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: web
+  template: 
+    metadata:
+      labels:
+        app: web
+    spec:
+      containers:
+        - name: web
+          image: limaedu/kube-news:v1
+          ports:
+          - containerPort: 8080
+          env:
+          - name: DB_PASSWORD
+            value: "admin"
+          - name: DB_USERNAME
+            value: "admin"
+          - name: DB_DATABASE
+            value: "bd"
+          - name: DB_HOST
+            value: "postgre"
+
+---
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: web
+spec:
+  selector:
+    app: web
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30000
+  type: NodePort
+
+# apiVersion: apps/v1
+# kind: Deployment
+# metadata:
+#   name: web
+# spec:
+#   selector:
+#     matchLabels:
+#       app: web
+#   template: 
+#     metadata:
+#       labels:
+#         app: web
+#     spec:
+#       containers:
+#         - name: web
+#           image: limaedu/kube-news:v1
+#           ports:
+#           - containerPort: 8080
+#           env:
+#           - name: DB_PASSWORD
+#             value: "admin"
+#           - name: DB_USER
+#             value: "admin"
+#           - name: DB_DATABASE
+#             value: "bd"
+#           - name: DB_HOST
+#             value: "postgre"
+
+# ---
+
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: web
+# spec:
+#   selector:
+#     app: web
+#   ports:
+#   - port: 80
+#     targetPort: 8080
+#     nodePort: 30000
+#   type: NodePort
