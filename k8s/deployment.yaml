@@ -54,7 +54,7 @@ spec:
     spec:
       containers:
         - name: web
-          image: limaedu/kube-news:v1
+          image: limaedu/kube-news:{{TAG}}
           ports:
           - containerPort: 8080
           env:
